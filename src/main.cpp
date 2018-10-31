@@ -28,11 +28,9 @@ SOFTWARE.
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
+	MainWindow w;
 
-	a.setStyle("Fusion");
-
-	MainWindow sim;
-	sim.show();
+	w.show();
 
 	return a.exec();
 }
