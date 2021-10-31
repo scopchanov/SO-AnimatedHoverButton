@@ -23,14 +23,16 @@ SOFTWARE.
 */
 
 #include <QApplication>
-#include "MainWindow.h"
+#include "AnimatedHoverButton.h"
 
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
-	MainWindow w;
+	AnimatedHoverButton button(QObject::tr("Hover Over Me"));
 
-	w.show();
+	button.setTransitionDuration(300);
+	button.resize(300, 150);
+	button.show();
 
 	return a.exec();
 }

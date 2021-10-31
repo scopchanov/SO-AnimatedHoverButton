@@ -36,9 +36,6 @@ public:
 	explicit AnimatedHoverButton(const QString &text, QWidget *parent = nullptr);
 
 	void setTransitionDuration(int duration);
-
-	void setPalette(const QPalette &p);
-
 	bool event(QEvent *event) override;
 
 protected:

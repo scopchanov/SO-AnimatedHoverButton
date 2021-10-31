@@ -32,7 +32,7 @@ AnimatedHoverButton::AnimatedHoverButton(const QString &text, QWidget *parent) :
 	QPushButton(text, parent),
 	m_transition(nullptr),
 	m_duration(1000),
-	m_currentColor(palette().brush(QPalette::Button).color())
+	m_currentColor(Qt::transparent)
 {
 
 }
@@ -42,67 +42,57 @@ void AnimatedHoverButton::setTransitionDuration(int duration)
 	m_duration = duration;
 }
 
-void AnimatedHoverButton::setPalette(const QPalette &p)
-{
-	QPushButton::setPalette(p);
-
-	m_currentColor = p.brush(QPalette::Button).color();
-}
-
 bool AnimatedHoverButton::event(QEvent *event)
 {
 	switch (event->type()) {
-	case QEvent::HoverEnter:
-		animateHover(true);
-		break;
-	case QEvent::HoverLeave:
-		animateHover(false);
-		break;
+		case QEvent::HoverEnter:
+			animateHover(true);
+			break;
+		case QEvent::HoverLeave:
+			animateHover(false);
+			break;
+		default:
+			break;
 	}
 
 	return QPushButton::event(event);
 }
 
-void AnimatedHoverButton::paintEvent(QPaintEvent * /*event*/)
+void AnimatedHoverButton::paintEvent(QPaintEvent */*event*/)
 {
 	QStylePainter painter(this);
 	QStyleOptionButton option;
-	QPalette p(palette());
 
 	initStyleOption(&option);
 
-	p.setBrush(QPalette::Button, m_currentColor);
-
-	option.palette = p;
-	option.state |= QStyle::State_MouseOver;
+	option.state &= ~QStyle::State_MouseOver;
 
 	painter.drawControl(QStyle::CE_PushButton, option);
+	painter.setOpacity(0.25);
+	painter.fillRect(rect(), m_currentColor);
 }
 
 void AnimatedHoverButton::animateHover(bool in)
 {
-	const QColor &baseColor(palette().brush(QPalette::Button).color());
-	const QColor &highlightColor(palette().brush(QPalette::Highlight).color());
-	QColor startValue(in ? baseColor : highlightColor);
-
-	if (m_transition) {
-		startValue = m_transition->currentValue().value<QColor>();
+	if (m_transition)
 		m_transition->stop();
-	}
 
 	m_transition = new QVariantAnimation(this);
-
-	m_transition->setStartValue(startValue);
-	m_transition->setEndValue(in ? highlightColor : baseColor);
 	m_transition->setDuration(m_duration);
+	m_transition->setStartValue(m_currentColor);
+	m_transition->setEndValue(in ? palette().highlight().color()
+								 : Qt::transparent);
 
-	connect(m_transition, &QVariantAnimation::valueChanged, [this](const QVariant &value){
+	connect(m_transition, &QVariantAnimation::valueChanged,
+			this, [this](const QVariant &value){
 		m_currentColor = value.value<QColor>();
 		repaint();
 	});
 
-	connect(m_transition, &QVariantAnimation::destroyed, [this](){
+	connect(m_transition, &QVariantAnimation::destroyed,
+			this, [this](){
 		m_transition = nullptr;
+		repaint();
 	});
 
 	m_transition->start(QAbstractAnimation::DeleteWhenStopped);

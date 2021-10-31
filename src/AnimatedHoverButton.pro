@@ -18,5 +18,4 @@ SOURCES += \
     AnimatedHoverButton.cpp
 
 HEADERS += \
-    AnimatedHoverButton.h \
-    MainWindow.h
+    AnimatedHoverButton.h
